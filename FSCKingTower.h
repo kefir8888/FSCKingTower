@@ -6,7 +6,7 @@
 class FSCKingTower : public QMainWindow
 	{
 	Q_OBJECT
-public:
+	public:
 	FSCKingTower();
 	virtual ~FSCKingTower();
 	};
