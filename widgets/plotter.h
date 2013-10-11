@@ -1,10 +1,10 @@
 #ifndef PLOTTER_H
 #define PLOTTER_H
 
-#include <QMap>
-#include <QPixmap>
-#include <QVector>
-#include <QWidget>
+#include <QtCore/QVector>
+#include <QtCore/QMap>
+#include <QtGui/QPixmap>
+#include <QtGui/QWidget>
 
 class QToolButton;
 class PlotSettings;

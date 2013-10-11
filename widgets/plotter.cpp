@@ -1,7 +1,7 @@
-#include <QtGui>
-#include <cmath>
-
 #include "plotter.h"
+
+#include <QtGui/QtGui>
+#include <cmath>
 
 Plotter::Plotter (QWidget *parent):
 	QWidget (parent)
