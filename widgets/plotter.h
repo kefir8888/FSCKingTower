@@ -18,6 +18,7 @@ class Plotter : public QWidget
 
 	void setPlotSettings (const PlotSettings &settings);
 	void setCurveData (int id, const QVector<QPointF> &data);
+	void addCurveData (int id, const QPointF &data);
 	void clearCurve (int id);
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;

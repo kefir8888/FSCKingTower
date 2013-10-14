@@ -65,6 +65,17 @@ void Plotter::setCurveData (int id, const QVector<QPointF> &data)
 	refreshPixmap();
 	}
 
+void Plotter::addCurveData (int id, const QPointF &data)
+	{
+	if (!curveMap.contains (id))
+		curveMap[id] = QVector<QPointF>() << data;
+	else
+		curveMap[id].append (data);
+
+	refreshPixmap();
+	}
+
+
 void Plotter::clearCurve (int id)
 	{
 	curveMap.remove (id);
