@@ -148,13 +148,13 @@ void Plotter::mouseReleaseEvent (QMouseEvent *event)
 		rect.translate (-Margin, -Margin);
 
 		PlotSettings prevSettings = zoomStack[curZoom];
-		PlotSettings settings;
-		double dx = prevSettings.spanX() / (width() - 2 * Margin);
+		PlotSettings settings = prevSettings;
+		double dx = prevSettings.spanX() / (width()  - 2 * Margin);
 		double dy = prevSettings.spanY() / (height() - 2 * Margin);
-		settings.minX = prevSettings.minX + dx * rect.left();
-		settings.maxX = prevSettings.minX + dx * rect.right();
-		settings.minY = prevSettings.maxY - dy * rect.bottom();
-		settings.maxY = prevSettings.maxY - dy * rect.top();
+		settings.minX += dx * rect.left();
+		settings.maxX += dx * rect.right();
+		settings.minY -= dy * rect.bottom();
+		settings.maxY -= dy * rect.top();
 		settings.adjust();
 
 		zoomStack.resize (curZoom + 1);
@@ -219,28 +219,26 @@ void Plotter::refreshPixmap()
 
 	QPainter painter (&pixmap);
 	painter.initFrom (this);
-	drawGrid (&painter);
+	drawGrid   (&painter);
 	drawCurves (&painter);
 	update();
 	}
 
 void Plotter::drawGrid (QPainter *painter)
 	{
-	QRect rect (Margin, Margin,
-	            width() - 2 * Margin, height() - 2 * Margin);
+	QRect rect (Margin, Margin, width() - 2 * Margin, height() - 2 * Margin);
 
 	if (!rect.isValid()) return;
 
 	PlotSettings settings = zoomStack[curZoom];
-	QPen quiteDark = palette().dark().color().light();
+	QPen quiteDark = palette().dark().color().lighter();
 	QPen light = palette().light().color();
 
 	for (int i = 0; i <= settings.numXTicks; ++i)
 		{
-		int x = rect.left() + (i * (rect.width() - 1)
-		                       / settings.numXTicks);
-		double label = settings.minX + (i * settings.spanX()
-		                                / settings.numXTicks);
+		int x = rect.left() + (i * (rect.width() - 1) / settings.numXTicks);
+		double label = settings.minX + (i * settings.spanX() / settings.numXTicks);
+
 		painter->setPen (quiteDark);
 		painter->drawLine (x, rect.top(), x, rect.bottom());
 		painter->setPen (light);
@@ -252,10 +250,9 @@ void Plotter::drawGrid (QPainter *painter)
 
 	for (int j = 0; j <= settings.numYTicks; ++j)
 		{
-		int y = rect.bottom() - (j * (rect.height() - 1)
-		                         / settings.numYTicks);
-		double label = settings.minY + (j * settings.spanY()
-		                                / settings.numYTicks);
+		int y = rect.bottom() - (j * (rect.height() - 1) / settings.numYTicks);
+		double label = settings.minY + (j * settings.spanY() / settings.numYTicks);
+
 		painter->setPen (quiteDark);
 		painter->drawLine (rect.left(), y, rect.right(), y);
 		painter->setPen (light);
@@ -265,18 +262,17 @@ void Plotter::drawGrid (QPainter *painter)
 		                   QString::number (label));
 		}
 
+	painter->setPen (light);
 	painter->drawRect (rect.adjusted (0, 0, -1, -1));
 	}
 
 void Plotter::drawCurves (QPainter *painter)
 	{
 	static const QColor colorForIds[6] =
-		{
-		Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow
-		};
+		{ Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
+
 	PlotSettings settings = zoomStack[curZoom];
-	QRect rect (Margin, Margin,
-	            width() - 2 * Margin, height() - 2 * Margin);
+	QRect rect (Margin, Margin, width() - 2 * Margin, height() - 2 * Margin);
 
 	if (!rect.isValid()) return;
 
@@ -296,10 +292,8 @@ void Plotter::drawCurves (QPainter *painter)
 			{
 			double dx = data[j].x() - settings.minX;
 			double dy = data[j].y() - settings.minY;
-			double x = rect.left() + (dx * (rect.width() - 1)
-			                          / settings.spanX());
-			double y = rect.bottom() - (dy * (rect.height() - 1)
-			                            / settings.spanY());
+			double x = rect.left() + (dx * (rect.width() - 1) / settings.spanX());
+			double y = rect.bottom() - (dy * (rect.height() - 1) / settings.spanY());
 			polyline[j] = QPointF (x, y);
 			}
 
