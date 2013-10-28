@@ -1,7 +1,7 @@
-#include <QtGui>
-#include <cmath>
-
 #include "plotter.h"
+
+#include <QtGui/QtGui>
+#include <cmath>
 
 Plotter::Plotter (QWidget *parent):
 	QWidget (parent)
@@ -64,6 +64,17 @@ void Plotter::setCurveData (int id, const QVector<QPointF> &data)
 	curveMap[id] = data;
 	refreshPixmap();
 	}
+
+void Plotter::addCurveData (int id, const QPointF &data)
+	{
+	if (!curveMap.contains (id))
+		curveMap[id] = QVector<QPointF>() << data;
+	else
+		curveMap[id].append (data);
+
+	refreshPixmap();
+	}
+
 
 void Plotter::clearCurve (int id)
 	{
