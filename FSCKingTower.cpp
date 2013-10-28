@@ -25,7 +25,7 @@ public:
 };
 
 FSCKingTower::FSCKingTower() :
-	plotter_ (new Plotter (this))
+	plotter_ (new Plotter (this)),
 	sine_generator_ (new SineGenerator)
 	{
 	setCentralWidget (new QWidget);
