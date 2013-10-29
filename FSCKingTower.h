@@ -3,6 +3,8 @@
 
 #include <QtGui/QMainWindow>
 
+class QTimer;
+
 class IGenerator
 	{
 	public:
@@ -20,9 +22,11 @@ class FSCKingTower : public QMainWindow
 	private:
 	Plotter* plotter_;
 	IGenerator* sine_generator_;
+	QTimer* generator_timer_;
 
 	private slots:
 	void generate_sine();
+	void control_timer (bool enabled);
 	};
 
 #endif // FSCKingTower_H

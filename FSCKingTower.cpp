@@ -7,6 +7,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QLayout>
+#include <QtCore/QTimer>
 #include <cmath>
 
 class SineGenerator : public IGenerator
@@ -26,7 +27,8 @@ public:
 
 FSCKingTower::FSCKingTower() :
 	plotter_ (new Plotter (this)),
-	sine_generator_ (new SineGenerator)
+	sine_generator_ (new SineGenerator),
+	generator_timer_ (new QTimer (this))
 	{
 	setCentralWidget (new QWidget);
 	centralWidget()->setLayout (new QVBoxLayout);
@@ -46,16 +48,28 @@ FSCKingTower::FSCKingTower() :
 
 	a = new QAction (this);
 	a->setText ("Generate Sine");
-	connect (a, SIGNAL (triggered()), SLOT (generate_sine()));
+	a->setCheckable (true);
+	connect (a, SIGNAL(toggled(bool)), SLOT(control_timer(bool)));
 	menuBar()->addMenu ("Generate")->addAction (a);
+	
+	generator_timer_->setInterval (100);
+	connect (generator_timer_, SIGNAL(timeout()), SLOT(generate_sine()));
 	}
 
 FSCKingTower::~FSCKingTower() { }
 
 void FSCKingTower::generate_sine()
 	{
-	for (int i = 0; i < 100; ++i)
-		plotter_->addCurveData (0, sine_generator_->next (0.01 * 2 * M_PI));
+	plotter_->addCurveData (0, sine_generator_->next (0.01 * 2 * M_PI));
 	}
+
+void FSCKingTower::control_timer(bool enabled)
+{
+	if (enabled)
+		generator_timer_->start();
+	
+	else
+		generator_timer_->stop();
+}
 
 #include "FSCKingTower.moc"
