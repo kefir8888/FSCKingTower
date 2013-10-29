@@ -70,6 +70,8 @@ void Plotter::addCurveData (int id, const QPointF &data)
 	QVector<QPointF>& curve = curveMap[id];
 	curve.append (data);
 
+	autoScroll (id);
+
 	refreshPixmap();
 	}
 
@@ -303,6 +305,31 @@ void Plotter::drawCurves (QPainter *painter)
 
 		painter->setPen (colorForIds[uint (id) % 6]);
 		painter->drawPolyline (polyline);
+		}
+	}
+
+void Plotter::autoScroll (int id)
+	{
+	QVector<QPointF> curve = curveMap[id];
+
+	if (curve.size() < 2) return;
+
+	/*
+	 * Logic: if the curve's old last point lies in the viewport (by X)
+	 *        and the curve's new last (i. e. inserted) point lies outside of the viewport,
+	 *        scroll the viewport by X to their delta.
+	 */
+
+	double newX = (curve.end() - 1)->x(),
+	       oldX = (curve.end() - 2)->x(),
+	       dX = newX - oldX;
+
+	for (QVector<PlotSettings>::iterator it = zoomStack.begin(); it != zoomStack.end(); ++it)
+		{
+		// if a point is outside of N-th zoom level, then it's automatically outside of all next zoom levels.
+		if (!it->inRangeX (oldX)) break;
+
+		if (!it->inRangeX (newX)) it->scrollTicks (ceil (dX / (it->spanX() / it->numXTicks)), 0);
 		}
 	}
 

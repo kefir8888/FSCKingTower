@@ -42,6 +42,8 @@ class Plotter : public QWidget
 	void drawGrid (QPainter *painter);
 	void drawCurves (QPainter *painter);
 
+	void autoScroll (int id);
+
 	enum { Margin = 50 };
 
 	QToolButton *zoomInButton;
