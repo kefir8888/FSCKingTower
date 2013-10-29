@@ -67,10 +67,8 @@ void Plotter::setCurveData (int id, const QVector<QPointF> &data)
 
 void Plotter::addCurveData (int id, const QPointF &data)
 	{
-	if (!curveMap.contains (id))
-		curveMap[id] = QVector<QPointF>() << data;
-	else
-		curveMap[id].append (data);
+	QVector<QPointF>& curve = curveMap[id];
+	curve.append (data);
 
 	refreshPixmap();
 	}
