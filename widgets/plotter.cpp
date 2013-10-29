@@ -158,15 +158,10 @@ void Plotter::mouseReleaseEvent (QMouseEvent *event)
 
 		rect.translate (-Margin, -Margin);
 
-		PlotSettings prevSettings = zoomStack[curZoom];
-		PlotSettings settings = prevSettings;
-		double dx = prevSettings.spanX() / (width()  - 2 * Margin);
-		double dy = prevSettings.spanY() / (height() - 2 * Margin);
-		settings.minX += dx * rect.left();
-		settings.maxX += dx * rect.right();
-		settings.minY -= dy * rect.bottom();
-		settings.maxY -= dy * rect.top();
-		settings.adjust();
+		PlotSettings settings = zoomStack[curZoom];
+		settings.adjustWindow (width() - 2 * Margin, height() - 2 * Margin,
+		                       rect.left(), rect.right(), rect.top(), rect.bottom());
+		settings.normalize();
 
 		zoomStack.resize (curZoom + 1);
 		zoomStack.append (settings);
@@ -182,19 +177,19 @@ void Plotter::keyPressEvent (QKeyEvent *event)
 		case Qt::Key_Minus: zoomOut(); break;
 
 		case Qt::Key_Left:
-			zoomStack[curZoom].scroll (-1, 0);
+			zoomStack[curZoom].scrollTicks (-1, 0);
 			refreshPixmap();
 			break;
 		case Qt::Key_Right:
-			zoomStack[curZoom].scroll (+1, 0);
+			zoomStack[curZoom].scrollTicks (+1, 0);
 			refreshPixmap();
 			break;
 		case Qt::Key_Down:
-			zoomStack[curZoom].scroll (0, -1);
+			zoomStack[curZoom].scrollTicks (0, -1);
 			refreshPixmap();
 			break;
 		case Qt::Key_Up:
-			zoomStack[curZoom].scroll (0, +1);
+			zoomStack[curZoom].scrollTicks (0, +1);
 			refreshPixmap();
 			break;
 
@@ -208,8 +203,8 @@ void Plotter::wheelEvent (QWheelEvent *event)
 	int numTicks = numDegrees / 15;
 
 	if (event->orientation() == Qt::Horizontal)
-		zoomStack[curZoom].scroll (numTicks, 0);
-	else zoomStack[curZoom].scroll (0, numTicks);
+		zoomStack[curZoom].scrollTicks (numTicks, 0);
+	else zoomStack[curZoom].scrollTicks (0, numTicks);
 
 	refreshPixmap();
 	}
@@ -324,7 +319,16 @@ PlotSettings::PlotSettings()
 	numYTicks = 5;
 	}
 
-void PlotSettings::scroll (int dx, int dy)
+void PlotSettings::scrollUnits(double dx, double dy)
+	{
+	minX += dx;
+	maxX += dx;
+
+	minY += dy;
+	maxY += dy;
+	}
+
+void PlotSettings::scrollTicks (int dx, int dy)
 	{
 	double stepX = spanX() / numXTicks;
 	minX += dx * stepX;
@@ -335,13 +339,24 @@ void PlotSettings::scroll (int dx, int dy)
 	maxY += dy * stepY;
 	}
 
-void PlotSettings::adjust()
+void PlotSettings::adjustWindow (int width, int height, int wMinX, int wMaxX, int wMinY, int wMaxY)
 	{
-	adjustAxis (minX, maxX, numXTicks);
-	adjustAxis (minY, maxY, numYTicks);
+	double scaleX = spanX() / width;
+	maxX = minX + scaleX * wMaxX;
+	minX = minX + scaleX * wMinX;
+
+	double scaleY = spanY() / height;
+	minY = maxY - scaleY * wMaxY;
+	maxY = maxY - scaleY * wMinY;
 	}
 
-void PlotSettings::adjustAxis (double &min, double &max, int &numTicks)
+void PlotSettings::normalize()
+	{
+	normalizeAxis (minX, maxX, numXTicks);
+	normalizeAxis (minY, maxY, numYTicks);
+	}
+
+void PlotSettings::normalizeAxis (double &min, double &max, int &numTicks)
 	{
 	const int MinTicks = 4;
 	double grossStep = (max - min) / MinTicks;

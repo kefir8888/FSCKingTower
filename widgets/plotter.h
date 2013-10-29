@@ -59,10 +59,24 @@ class PlotSettings
 	public:
 	PlotSettings();
 
-	void scroll (int dx, int dy);
-	void adjust();
+	// Move the viewport by a given amount of ticks.
+	void scrollTicks (int dx, int dy);
+
+	// Move the viewport by a given amount of plot units.
+	void scrollUnits (double dx, double dy);
+
+	// Pan (move+scale) the viewport to a given amount of pixels.
+	void adjustWindow (int width, int height,
+	                   int wMinX, int wMaxX, int wMinY, int wMaxY);
+
+	// Normalize the viewport's scale (recalculate min, max and number of ticks).
+	void normalize();
+
 	double spanX() const { return maxX - minX; }
 	double spanY() const { return maxY - minY; }
+
+	bool inRangeX (double x) const { return (x > minX) && (x < maxX); }
+	bool inRangeY (double y) const { return (y > minY) && (y < maxY); }
 
 	double minX;
 	double maxX;
@@ -72,7 +86,7 @@ class PlotSettings
 	int numYTicks;
 
 	private:
-	static void adjustAxis (double &min, double &max, int &numTicks);
+	static void normalizeAxis (double &min, double &max, int &numTicks);
 	};
 
 #endif
